@@ -6,7 +6,12 @@ import Security
 @MainActor
 @Observable
 final class AppState {
+    /// Simulator: the backend running on this Mac. Real iPhone: the live server (it can't reach the Mac's localhost).
+    #if targetEnvironment(simulator)
     static let defaultServer = "http://localhost:5050"
+    #else
+    static let defaultServer = "https://bet-management-api.onrender.com"
+    #endif
 
     private(set) var session: AuthSession?
     private(set) var serverAddress: String
