@@ -54,15 +54,34 @@ struct APIClient {
             request.httpBody = body
         }
 
-        let data: Data
-        let response: URLResponse
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw APIError(status: 0, message: "Can't reach the server. Check your internet connection and the server address, then try again.")
+        // Render's free plan puts the server to sleep after 15 idle minutes. While it wakes, Render answers 503
+        // with a "waking up" page before the request reaches our server, so retrying is safe. Keep trying for
+        // about 90 seconds before giving up.
+        let deadline = Date().addingTimeInterval(90)
+        var data = Data()
+        var status = 0
+        while true {
+            do {
+                let (body, response) = try await URLSession.shared.data(for: request)
+                data = body
+                status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            } catch let error as URLError where error.code == .timedOut && method == "GET" && Date() < deadline {
+                continue
+            } catch let error as URLError {
+                throw APIError(status: 0, message: "Can't reach the server at \(trimmedBase). \(error.localizedDescription)")
+            } catch {
+                throw APIError(status: 0, message: "Can't reach the server at \(trimmedBase). Check your internet connection and the server address.")
+            }
+            if status == 503 && Date() < deadline {
+                try await Task.sleep(for: .seconds(4))
+                continue
+            }
+            break
+        }
+        if status == 503 {
+            throw APIError(status: 503, message: "The server is still waking up. Wait a minute and try again.")
         }
 
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         guard (200..<300).contains(status) else {
             let parsed = try? JSONDecoder().decode(ErrorBody.self, from: data)
             let fieldMessage = parsed?.errors?.values.flatMap { $0 }.first
