@@ -41,7 +41,13 @@ extension APIClient {
                 return InviteDetails(kind: .staff, code: code, organizationName: invite.workspaceName,
                                      fullName: invite.fullName, email: invite.email, phone: invite.phone)
             } catch let staffError as APIError where staffError.status == 404 || staffError.status == 400 {
-                throw APIError(status: 404, message: "That invitation code isn't valid or has expired. Ask for a new one.")
+                do {
+                    let invite: TenantInvitePreview = try await get("api/tenant/auth/invites/\(Self.encode(code))")
+                    return InviteDetails(kind: .tenant, code: code, organizationName: invite.workspaceName,
+                                         fullName: invite.fullName, email: invite.email, phone: invite.phone)
+                } catch let tenantError as APIError where tenantError.status == 404 || tenantError.status == 400 {
+                    throw APIError(status: 404, message: "That invitation code isn't valid or has expired. Ask whoever invited you for a new one.")
+                }
             }
         }
     }

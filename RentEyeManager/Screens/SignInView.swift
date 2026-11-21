@@ -20,7 +20,7 @@ struct SignInView: View {
                     Text("Rent Eye")
                         .font(.largeTitle.weight(.bold))
                         .foregroundStyle(.white)
-                    Text("Manage your buildings, leases and rent from your phone.")
+                    Text("Rent, bills and repairs in one place, for landlords and tenants.")
                         .foregroundStyle(.white.opacity(0.8))
                 }
                 .padding(.top, 48)

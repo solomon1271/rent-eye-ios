@@ -526,61 +526,88 @@ struct EditOrganizationSheet: View {
 struct InviteShareSheet: View {
     @Environment(\.dismiss) private var dismiss
     let invite: InviteToShare
-    @State private var copied = false
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    Label("Invitation ready", systemImage: "checkmark.seal.fill")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(Theme.ok)
+            InviteShareContent(invite: invite)
+                .navigationTitle(invite.organizationName)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+    }
+}
 
-                    Text("Send this to \(invite.personName). They install Rent Eye, tap \"I have an invitation\" and enter the code. It only works with \(invite.email).")
+/// The code (and website link) to send, with Share and Copy buttons.
+struct InviteShareContent: View {
+    let invite: InviteToShare
+    @State private var copied = false
+
+    private var instructions: String {
+        let app = "On iPhone they install Rent Eye, tap \"I have an invitation\" and enter the code."
+        let web = invite.webLink == nil ? "" : " On Android or a computer they open the link instead."
+        return "Send this to \(invite.personName). \(app)\(web) It only works with \(invite.email)."
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                Label("Invitation ready", systemImage: "checkmark.seal.fill")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Theme.ok)
+
+                Text(instructions)
+                    .foregroundStyle(Theme.ink)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Invitation code").font(.footnote.weight(.semibold)).foregroundStyle(Theme.brand)
+                    Text(InviteShareContent.grouped(invite.code))
+                        .font(.title3.monospaced().weight(.semibold))
                         .foregroundStyle(Theme.ink)
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Invitation code").font(.footnote.weight(.semibold)).foregroundStyle(Theme.brand)
-                        Text(InviteShareSheet.grouped(invite.code))
-                            .font(.title3.monospaced().weight(.semibold))
+                        .textSelection(.enabled)
+                    if let link = invite.webLink {
+                        Text("Website link").font(.footnote.weight(.semibold)).foregroundStyle(Theme.brand).padding(.top, 6)
+                        Text(link)
+                            .font(.footnote)
                             .foregroundStyle(Theme.ink)
                             .textSelection(.enabled)
-                        if let expires = invite.expiresAtUtc {
-                            HStack(spacing: 4) {
-                                Text("Expires").font(.caption).foregroundStyle(Theme.muted)
-                                DateLabel(iso: expires).font(.caption).foregroundStyle(Theme.muted)
-                            }
+                    }
+                    if let expires = invite.expiresAtUtc {
+                        HStack(spacing: 4) {
+                            Text("Expires").font(.caption).foregroundStyle(Theme.muted)
+                            DateLabel(iso: expires).font(.caption).foregroundStyle(Theme.muted)
                         }
+                        .padding(.top, 4)
                     }
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Theme.brandSoft, in: RoundedRectangle(cornerRadius: 14))
-
-                    ShareLink(item: invite.shareText) {
-                        Label("Share by WhatsApp, Telegram…", systemImage: "square.and.arrow.up")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .foregroundStyle(.white)
-                            .background(Theme.brand, in: RoundedRectangle(cornerRadius: 12))
-                    }
-
-                    Button {
-                        UIPasteboard.general.string = invite.shareText
-                        copied = true
-                    } label: {
-                        Label(copied ? "Copied" : "Copy message", systemImage: copied ? "checkmark" : "doc.on.doc")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
                 }
-                .padding(20)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.brandSoft, in: RoundedRectangle(cornerRadius: 14))
+
+                ShareLink(item: invite.shareText) {
+                    Label("Share by WhatsApp, Telegram…", systemImage: "square.and.arrow.up")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .foregroundStyle(.white)
+                        .background(Theme.brand, in: RoundedRectangle(cornerRadius: 12))
+                }
+
+                Button {
+                    UIPasteboard.general.string = invite.shareText
+                    copied = true
+                } label: {
+                    Label(copied ? "Copied" : "Copy message", systemImage: copied ? "checkmark" : "doc.on.doc")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Text("There's no email on the server yet, so the invitation isn't sent automatically. Inviting the same person again replaces this code.")
+                    .font(.caption)
+                    .foregroundStyle(Theme.muted)
             }
-            .background(Theme.background)
-            .navigationTitle(invite.organizationName)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .padding(20)
         }
+        .background(Theme.background)
     }
 
     /// "3f2a…" in groups of four so it's easy to read out over the phone.

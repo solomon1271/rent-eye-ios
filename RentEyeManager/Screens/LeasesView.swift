@@ -96,6 +96,8 @@ struct LeaseDetailView: View {
                     Text("Billing")
                 }
 
+                LeaseTenantAccessSection(lease: lease)
+
                 Section("Invoices") {
                     if invoices.isEmpty {
                         Text("No invoices yet.").foregroundStyle(Theme.muted)

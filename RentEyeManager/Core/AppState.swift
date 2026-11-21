@@ -52,12 +52,6 @@ final class AppState {
     }
 
     private func accept(_ session: AuthSession) throws {
-        if session.isTenant && !session.isPlatform {
-            // End that session on the server; tenant screens aren't in the app yet.
-            let token = session.accessToken
-            Task { try? await APIClient(baseURL: serverAddress, token: token).postIgnoringResult("api/auth/logout", body: EmptyBody()) }
-            throw APIError(status: 403, message: "Tenant accounts aren't supported in the app yet. They're coming soon.")
-        }
         self.session = session
         SessionStore.save(session)
     }

@@ -117,44 +117,61 @@ struct ResetAccountsResult: Decodable {
 
 struct MessageResult: Decodable { let message: String }
 
-/// An invitation to share: the code the person types into the app.
+/// An invitation to share: the code the person types into the app, and the website link when there is one.
 struct InviteToShare: Identifiable {
     let organizationName: String
     let personName: String
     let email: String
     let code: String
     let expiresAtUtc: String?
+    var kind: InviteKind = .organizationOwner
+    var webLink: String? = nil
     var id: String { code }
 
+    private var purpose: String {
+        switch kind {
+        case .organizationOwner: "to manage \(organizationName) on Rent Eye"
+        case .staff: "to join \(organizationName) on Rent Eye"
+        case .tenant: "by \(organizationName) to Rent Eye, to see your bills, tell them when you've paid and report repairs"
+        }
+    }
+
     var shareText: String {
-        """
-        Hi \(personName), you're invited to manage \(organizationName) on Rent Eye.
+        var lines = ["Hi \(personName), you're invited \(purpose).", ""]
+        if let webLink {
+            lines.append("On any phone or computer: open \(webLink)")
+        }
+        lines.append("In the Rent Eye iPhone app: tap \"I have an invitation\" and enter this code: \(code)")
+        lines.append("")
+        lines.append("Use this email when you set up: \(email)")
+        return lines.joined(separator: "\n")
+    }
 
-        1. Install the Rent Eye app.
-        2. Tap "I have an invitation" on the sign-in screen.
-        3. Enter this code: \(code)
-
-        Use this email when you set up: \(email)
-        """
+    /// The server's website link, unless it still points at a developer's own computer.
+    static func usableWebLink(_ link: String?) -> String? {
+        guard let link, link.hasPrefix("https://"), !link.contains("localhost") else { return nil }
+        return link
     }
 }
 
 // MARK: - Accepting an invitation
 
 enum InviteKind: String {
-    case organizationOwner, staff
+    case organizationOwner, staff, tenant
 
     var acceptPath: String {
         switch self {
         case .organizationOwner: "api/platform/organization-invites/accept"
         case .staff: "api/staff/auth/accept-invite"
+        case .tenant: "api/tenant/auth/accept-invite"
         }
     }
 
     var roleDescription: String {
         switch self {
-        case .organizationOwner: "administrator"
-        case .staff: "staff member"
+        case .organizationOwner: "the administrator"
+        case .staff: "a staff member"
+        case .tenant: "a tenant"
         }
     }
 }

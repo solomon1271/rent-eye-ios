@@ -3,6 +3,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppState.self) private var app
     @State private var store = PortfolioStore()
+    @State private var tenantStore = TenantStore()
 
     var body: some View {
         Group {
@@ -10,6 +11,9 @@ struct RootView: View {
                 SignInView()
             } else if app.session?.isPlatform == true {
                 PlatformHomeView()
+            } else if app.session?.isTenant == true {
+                TenantTabView()
+                    .environment(tenantStore)
             } else {
                 MainTabView()
                     .environment(store)
@@ -17,7 +21,10 @@ struct RootView: View {
         }
         .tint(Theme.brand)
         .task { await app.validateSession() }
-        .onChange(of: app.session?.userId) { _, _ in store.reset() }
+        .onChange(of: app.session?.userId) { _, _ in
+            store.reset()
+            tenantStore.reset()
+        }
     }
 }
 

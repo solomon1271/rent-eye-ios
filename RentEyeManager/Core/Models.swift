@@ -18,7 +18,7 @@ struct AuthSession: Codable, Equatable {
     var isAdministrator: Bool { role.localizedCaseInsensitiveContains("admin") }
     var isTenant: Bool { role.localizedCaseInsensitiveContains("tenant") }
     var isPlatform: Bool { isPlatformAdmin == true }
-    var roleLabel: String { isPlatform ? "Platform admin" : (isAdministrator ? "Admin" : "Staff") }
+    var roleLabel: String { isPlatform ? "Platform admin" : (isTenant ? "Tenant" : (isAdministrator ? "Admin" : "Staff")) }
 }
 
 struct LoginResult: Decodable {
