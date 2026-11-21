@@ -10,6 +10,7 @@ struct SignInView: View {
     @State private var isWorking = false
     @State private var showServer = false
     @State private var serverAddress = ""
+    @State private var showInvite = false
 
     var body: some View {
         ScrollView {
@@ -81,6 +82,17 @@ struct SignInView: View {
                 .background(.white, in: RoundedRectangle(cornerRadius: 18))
 
                 Button {
+                    showInvite = true
+                } label: {
+                    Label("I have an invitation", systemImage: "envelope.open")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .foregroundStyle(.white)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.white.opacity(0.5)))
+                }
+
+                Button {
                     serverAddress = app.serverAddress
                     showServer = true
                 } label: {
@@ -92,6 +104,7 @@ struct SignInView: View {
             .padding(24)
         }
         .background(Theme.brandDeep.ignoresSafeArea())
+        .sheet(isPresented: $showInvite) { AcceptInviteView() }
         .alert("Server address", isPresented: $showServer) {
             TextField("https://…", text: $serverAddress)
                 .textInputAutocapitalization(.never)

@@ -8,6 +8,8 @@ struct RootView: View {
         Group {
             if app.session == nil {
                 SignInView()
+            } else if app.session?.isPlatform == true {
+                PlatformHomeView()
             } else {
                 MainTabView()
                     .environment(store)

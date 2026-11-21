@@ -22,6 +22,8 @@ final class AppState {
     }
 
     var api: APIClient { APIClient(baseURL: serverAddress, token: session?.accessToken) }
+    /// For calls made before signing in (looking up and accepting invitations).
+    var unauthenticatedAPI: APIClient { APIClient(baseURL: serverAddress, token: nil) }
 
     func setServerAddress(_ address: String) {
         let trimmed = address.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -50,13 +52,11 @@ final class AppState {
     }
 
     private func accept(_ session: AuthSession) throws {
-        if session.isTenant || session.isPlatformAdmin == true {
-            // End that session on the server; this app is for property managers.
+        if session.isTenant && !session.isPlatform {
+            // End that session on the server; tenant screens aren't in the app yet.
             let token = session.accessToken
             Task { try? await APIClient(baseURL: serverAddress, token: token).postIgnoringResult("api/auth/logout", body: EmptyBody()) }
-            throw APIError(status: 403, message: session.isTenant
-                ? "This app is for landlords and staff. Tenants will get their own app."
-                : "The platform admin account works on the website. Sign in with an organisation account.")
+            throw APIError(status: 403, message: "Tenant accounts aren't supported in the app yet. They're coming soon.")
         }
         self.session = session
         SessionStore.save(session)

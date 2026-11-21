@@ -187,7 +187,9 @@ struct SettingsView: View {
                 Section("Account") {
                     LabeledContent("Name", value: app.session?.fullName ?? "")
                     LabeledContent("Email", value: app.session?.email ?? "")
-                    LabeledContent("Organisation", value: app.session?.workspaceName ?? "")
+                    if app.session?.isPlatform != true {
+                        LabeledContent("Organisation", value: app.session?.workspaceName ?? "")
+                    }
                     LabeledContent("Role", value: app.session?.roleLabel ?? "")
                 }
 

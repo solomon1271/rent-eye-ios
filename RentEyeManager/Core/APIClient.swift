@@ -25,6 +25,14 @@ struct APIClient {
         try decode(try await send("POST", path, body: try JSONEncoder().encode(body)))
     }
 
+    func put<T: Decodable>(_ path: String, body: some Encodable, as type: T.Type = T.self) async throws -> T {
+        try decode(try await send("PUT", path, body: try JSONEncoder().encode(body)))
+    }
+
+    func delete<T: Decodable>(_ path: String, as type: T.Type = T.self) async throws -> T {
+        try decode(try await send("DELETE", path, body: nil))
+    }
+
     func postIgnoringResult(_ path: String, body: some Encodable) async throws {
         _ = try await send("POST", path, body: try JSONEncoder().encode(body))
     }
