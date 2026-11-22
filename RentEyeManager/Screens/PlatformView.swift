@@ -620,9 +620,9 @@ struct InviteShareContent: View {
                 }
                 .buttonStyle(.bordered)
 
-                Text("There's no email on the server yet, so the invitation isn't sent automatically. Inviting the same person again replaces this code.")
-                    .font(.caption)
-                    .foregroundStyle(Theme.muted)
+                Text("Not sent yet. Rent Eye doesn't send WhatsApp, Telegram or SMS messages by itself: tap the button above, then tap send in the app that opens. Inviting the same person again replaces this code.")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(Theme.warn)
             }
             .padding(20)
         }
