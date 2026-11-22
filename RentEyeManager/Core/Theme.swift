@@ -1,14 +1,14 @@
 import SwiftUI
 
-/// The "Highland" palette shared with the web app: deep highland green, Meskel-flower yellow, cool off-white.
+/// The "Abay" palette shared with the web app: Blue Nile blue, Meskel-flower gold, cool off-white.
 enum Theme {
-    static let brand = Color(hex: 0x155E54)
-    static let brandDark = Color(hex: 0x0E433C)
-    static let brandDeep = Color(hex: 0x0C2F2B)
-    static let brandSoft = Color(hex: 0xE4EFEC)
+    static let brand = Color(hex: 0x1B4F7A)
+    static let brandDark = Color(hex: 0x153E61)
+    static let brandDeep = Color(hex: 0x102A42)
+    static let brandSoft = Color(hex: 0xE3ECF5)
     static let accent = Color(hex: 0xE8B23A)
     static let accentSoft = Color(hex: 0xFBF1D9)
-    static let background = Color(hex: 0xF5F7F4)
+    static let background = Color(hex: 0xF4F7FB)
     static let ink = Color(hex: 0x1C2530)
     static let muted = Color(hex: 0x5A6472)
     static let ok = Color(hex: 0x1E7B4F)
@@ -131,6 +131,6 @@ struct MetricCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(highlight ? Theme.brandDeep : .white, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(hex: 0xDCE3DE), lineWidth: highlight ? 0 : 1))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(hex: 0xDCE5EE), lineWidth: highlight ? 0 : 1))
     }
 }

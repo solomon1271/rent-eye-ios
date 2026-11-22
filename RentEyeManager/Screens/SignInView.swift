@@ -158,6 +158,6 @@ private extension View {
     func fieldStyle() -> some View {
         padding(14)
             .background(Theme.background, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: 0xC6D1CA)))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: 0xC3D1DF)))
     }
 }
