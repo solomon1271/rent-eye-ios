@@ -106,6 +106,7 @@ struct CreateTenantInviteRequest: Encodable {
     let leaseId: String?
     let propertyId: String?
     let unit: String?
+    let contactChannel: String
 }
 
 struct TenantInviteResult: Decodable {
@@ -118,7 +119,47 @@ struct TenantInviteResult: Decodable {
     let expiresAtUtc: String
     let deliveryMode: String
     let previewInviteUrl: String?
+    let contactChannel: String?
+    let phone: String?
 }
+
+/// A one-time password reset code for a tenant without email, sent by the landlord.
+struct TenantResetCode: Decodable, Identifiable {
+    let code: String
+    let expiresAtUtc: String
+    let fullName: String
+    let email: String
+    let phone: String
+    let preferredContact: String
+    var id: String { code }
+
+    var channel: ContactChannel {
+        let preferred = ContactChannel(serverValue: preferredContact)
+        // Email only works when there is an address.
+        if preferred == .email && email.isEmpty { return .whatsapp }
+        return preferred
+    }
+
+    var signInWith: String { email.isEmpty ? phone : email }
+
+    var shareText: String {
+        [
+            "Hi \(fullName), your Rent Eye password reset code is \(code).",
+            "It works once and expires in 24 hours.",
+            "",
+            "In the Rent Eye app: tap \"Have a reset code?\" on the sign-in screen.",
+            "Sign in with: \(signInWith)"
+        ].joined(separator: "\n")
+    }
+}
+
+struct ResetWithCodeRequest: Encodable {
+    let emailOrPhone: String
+    let code: String
+    let newPassword: String
+}
+
+struct MessageOnly: Decodable { let message: String }
 
 struct GrantLeaseAccessRequest: Encodable { let email: String }
 

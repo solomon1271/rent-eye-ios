@@ -46,4 +46,14 @@ extension APIClient {
     func grantLeaseAccess(leaseId: String, email: String) async throws -> LeaseAccessEntry {
         try await post("api/leases/\(Self.encode(leaseId))/access", body: GrantLeaseAccessRequest(email: email))
     }
+
+    /// Administrators: a one-time reset code for a tenant on this lease.
+    func issueResetCode(leaseId: String, userId: String) async throws -> TenantResetCode {
+        try await post("api/leases/\(Self.encode(leaseId))/access/\(Self.encode(userId))/reset-code", body: EmptyBody())
+    }
+
+    /// No sign-in needed: the tenant sets a new password with the code from their landlord.
+    func resetWithCode(_ request: ResetWithCodeRequest) async throws -> MessageOnly {
+        try await post("api/auth/reset-with-code", body: request)
+    }
 }

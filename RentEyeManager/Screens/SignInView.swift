@@ -11,6 +11,7 @@ struct SignInView: View {
     @State private var showServer = false
     @State private var serverAddress = ""
     @State private var showInvite = false
+    @State private var showReset = false
 
     var body: some View {
         ScrollView {
@@ -47,7 +48,7 @@ struct SignInView: View {
                         }
                         .foregroundStyle(Theme.brand)
                     } else {
-                        TextField("Email", text: $email)
+                        TextField("Email or phone", text: $email)
                             .keyboardType(.emailAddress)
                             .textContentType(.username)
                             .textInputAutocapitalization(.never)
@@ -62,6 +63,9 @@ struct SignInView: View {
                             primaryLabel("Sign in")
                         }
                         .disabled(email.isEmpty || password.isEmpty || isWorking)
+                        Button("Have a reset code?") { showReset = true }
+                            .font(.callout)
+                            .foregroundStyle(Theme.brand)
                     }
 
                     if let errorMessage {
@@ -105,6 +109,7 @@ struct SignInView: View {
         }
         .background(Theme.brandDeep.ignoresSafeArea())
         .sheet(isPresented: $showInvite) { AcceptInviteView() }
+        .sheet(isPresented: $showReset) { ResetWithCodeView(prefill: email) }
         .alert("Server address", isPresented: $showServer) {
             TextField("https://…", text: $serverAddress)
                 .textInputAutocapitalization(.never)

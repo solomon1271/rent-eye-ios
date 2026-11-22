@@ -545,7 +545,8 @@ struct InviteShareContent: View {
     private var instructions: String {
         let app = "On iPhone they install Rent Eye, tap \"I have an invitation\" and enter the code."
         let web = invite.webLink == nil ? "" : " On Android or a computer they open the link instead."
-        return "Send this to \(invite.personName). \(app)\(web) It only works with \(invite.email)."
+        let who = invite.email.isEmpty ? "They'll sign in with their phone number." : "It only works with \(invite.email)."
+        return "Send this to \(invite.personName). \(app)\(web) \(who)"
     }
 
     var body: some View {
@@ -583,13 +584,31 @@ struct InviteShareContent: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.brandSoft, in: RoundedRectangle(cornerRadius: 14))
 
-                ShareLink(item: invite.shareText) {
-                    Label("Share by WhatsApp, Telegram…", systemImage: "square.and.arrow.up")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .foregroundStyle(.white)
-                        .background(Theme.brand, in: RoundedRectangle(cornerRadius: 12))
+                if let channel = invite.channel,
+                   let url = channel.link(phone: invite.phone, email: invite.email, message: invite.shareText,
+                                          webLink: invite.webLink, subject: "\(invite.organizationName) invited you to Rent Eye") {
+                    Link(destination: url) {
+                        Label(channel.actionLabel, systemImage: channel.systemImage)
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .foregroundStyle(.white)
+                            .background(Theme.brand, in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    ShareLink(item: invite.shareText) {
+                        Label("Send another way", systemImage: "square.and.arrow.up")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                } else {
+                    ShareLink(item: invite.shareText) {
+                        Label("Share by WhatsApp, Telegram…", systemImage: "square.and.arrow.up")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .foregroundStyle(.white)
+                            .background(Theme.brand, in: RoundedRectangle(cornerRadius: 12))
+                    }
                 }
 
                 Button {

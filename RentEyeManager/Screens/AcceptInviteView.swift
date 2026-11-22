@@ -43,7 +43,13 @@ struct AcceptInviteView: View {
                     }
 
                     Section("Your details") {
-                        LabeledContent("Email", value: invite.email)
+                        if invite.email.isEmpty {
+                            Text("You'll sign in with your phone number.")
+                                .font(.callout)
+                                .foregroundStyle(Theme.muted)
+                        } else {
+                            LabeledContent("Email", value: invite.email)
+                        }
                         TextField("Full name", text: $fullName)
                             .textContentType(.name)
                         TextField("Phone", text: $phone)
@@ -62,7 +68,7 @@ struct AcceptInviteView: View {
                         if let passwordProblem {
                             Text(passwordProblem).foregroundStyle(Theme.danger)
                         } else {
-                            Text("At least 8 characters. You'll use it with \(invite.email) to sign in.")
+                            Text("At least 8 characters. You'll use it with \(invite.email.isEmpty ? "your phone number" : invite.email) to sign in.")
                         }
                     }
                 } else {
@@ -133,10 +139,11 @@ struct AcceptInviteView: View {
                 email: invite.email,
                 phone: phone.trimmingCharacters(in: .whitespaces),
                 password: password))
-            // The account is ready; sign straight in with the new password.
-            let challenge = try await app.signIn(email: invite.email, password: password)
+            // The account is ready; sign straight in with the new password (phone when there's no email).
+            let signInWith = invite.email.isEmpty ? phone.trimmingCharacters(in: .whitespaces) : invite.email
+            let challenge = try await app.signIn(email: signInWith, password: password)
             if challenge != nil {
-                errorMessage = "Your account is ready. Sign in with \(invite.email) and your new password."
+                errorMessage = "Your account is ready. Sign in with \(signInWith) and your new password."
                 return
             }
             dismiss()

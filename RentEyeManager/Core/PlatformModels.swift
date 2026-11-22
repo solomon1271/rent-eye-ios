@@ -126,6 +126,9 @@ struct InviteToShare: Identifiable {
     let expiresAtUtc: String?
     var kind: InviteKind = .organizationOwner
     var webLink: String? = nil
+    /// How to send it (tenants); nil shows the general share sheet only.
+    var channel: ContactChannel? = nil
+    var phone: String? = nil
     var id: String { code }
 
     private var purpose: String {
@@ -143,7 +146,11 @@ struct InviteToShare: Identifiable {
         }
         lines.append("In the Rent Eye iPhone app: tap \"I have an invitation\" and enter this code: \(code)")
         lines.append("")
-        lines.append("Use this email when you set up: \(email)")
+        if email.isEmpty, let phone, !phone.isEmpty {
+            lines.append("You'll sign in with your phone number: \(phone)")
+        } else {
+            lines.append("Use this email when you set up: \(email)")
+        }
         return lines.joined(separator: "\n")
     }
 
